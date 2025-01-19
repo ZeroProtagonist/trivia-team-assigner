@@ -1,17 +1,27 @@
 "use client"
 
-import React, { useState } from 'react';
+import React, { useState, FormEvent, MouseEvent } from 'react';
 import { X, Plus, Link as LinkIcon, Shuffle } from 'lucide-react';
 
+interface Player {
+  name: string;
+}
+
+interface Team {
+  name: string;
+  members: string[];
+  targetSize: number;
+}
+
 const TeamAssigner = () => {
-  const [players, setPlayers] = useState([]);
+  const [players, setPlayers] = useState<string[]>([]);
   const [newPlayer, setNewPlayer] = useState('');
-  const [links, setLinks] = useState([]);
-  const [teams, setTeams] = useState([]);
-  const [selectedPlayers, setSelectedPlayers] = useState([]);
+  const [links, setLinks] = useState<string[][]>([]);
+  const [teams, setTeams] = useState<Team[]>([]);
+  const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
   const [numTeams, setNumTeams] = useState(2);
 
-  const addPlayer = (e) => {
+  const addPlayer = (e: FormEvent) => {
     e.preventDefault();
     if (newPlayer.trim()) {
       setPlayers([...players, newPlayer.trim()]);
@@ -19,13 +29,13 @@ const TeamAssigner = () => {
     }
   };
 
-  const removePlayer = (index) => {
+  const removePlayer = (index: number) => {
     const newPlayers = players.filter((_, i) => i !== index);
     setPlayers(newPlayers);
     setLinks(links.filter(link => !link.includes(players[index])));
   };
 
-  const togglePlayerSelection = (player) => {
+  const togglePlayerSelection = (player: string) => {
     if (selectedPlayers.includes(player)) {
       setSelectedPlayers(selectedPlayers.filter(p => p !== player));
     } else {
@@ -40,7 +50,7 @@ const TeamAssigner = () => {
     }
   };
 
-  const removeLink = (index) => {
+  const removeLink = (index: number) => {
     setLinks(links.filter((_, i) => i !== index));
   };
 
@@ -112,7 +122,7 @@ const TeamAssigner = () => {
           <input
             type="text"
             value={newPlayer}
-            onChange={(e) => setNewPlayer(e.target.value)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewPlayer(e.target.value)}
             placeholder="Enter player name"
             className="flex-1 p-2 border rounded"
           />
@@ -139,7 +149,7 @@ const TeamAssigner = () => {
               >
                 {player}
                 <button
-                  onClick={(e) => {
+                  onClick={(e: MouseEvent) => {
                     e.stopPropagation();
                     removePlayer(index);
                   }}
@@ -195,7 +205,9 @@ const TeamAssigner = () => {
                 type="number"
                 min="2"
                 value={numTeams}
-                onChange={(e) => setNumTeams(Math.max(2, parseInt(e.target.value) || 2))}
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
+                  setNumTeams(Math.max(2, parseInt(e.target.value) || 2))
+                }
                 className="ml-2 p-1 w-16 border rounded"
               />
             </label>
