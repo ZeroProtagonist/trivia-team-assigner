@@ -67,9 +67,9 @@ const TeamAssigner = () => {
     const extraPlayers = totalPlayers % numTeams;
 
     // Initialize teams with names and empty member arrays
-    const newTeams = Array.from({ length: numTeams }, (_, index) => ({
+    const newTeams: Team[] = Array.from({ length: numTeams }, (_, index) => ({
       name: generateTeamName(),
-      members: [],
+      members: [] as string[],
       targetSize: index < extraPlayers ? baseTeamSize + 1 : baseTeamSize
     }));
 
@@ -95,14 +95,11 @@ const TeamAssigner = () => {
         })[0];
 
       if (bestTeam) {
-        // If we found a suitable team, add the group to it
-        bestTeam.members.push(...group);
+        bestTeam.members = [...bestTeam.members, ...group];
       } else {
-        // If no team can accommodate the group while maintaining even sizes,
-        // add it to the team with the fewest members
         const teamWithFewestMembers = newTeams
           .sort((a, b) => a.members.length - b.members.length)[0];
-        teamWithFewestMembers.members.push(...group);
+        teamWithFewestMembers.members = [...teamWithFewestMembers.members, ...group];
       }
     });
 
