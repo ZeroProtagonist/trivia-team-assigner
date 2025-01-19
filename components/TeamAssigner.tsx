@@ -1,3 +1,8 @@
+echo "// Team Assigner component for trivia teams" > temp.txt
+cat temp.txt components/TeamAssigner.tsx > temp2.txt
+mv temp2.txt components/TeamAssigner.tsx
+rm temp.txt
+
 "use client"
 
 import React, { useState } from 'react';
