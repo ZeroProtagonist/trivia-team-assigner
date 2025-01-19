@@ -1,4 +1,5 @@
-import TeamAssigner from '@/components/TeamAssigner'
+import dynamic from 'next/dynamic'
+const TeamAssigner = dynamic(() => import('@/components/TeamAssigner'), { ssr: false })
 
 export default function Home() {
   return (
