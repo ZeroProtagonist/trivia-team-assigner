@@ -1,5 +1,4 @@
-import dynamic from 'next/dynamic'
-const TeamAssigner = dynamic(() => import('@/components/TeamAssigner'), { ssr: false })
+echo 'import TeamAssigner from "@/components/TeamAssigner"
 
 export default function Home() {
   return (
@@ -7,4 +6,4 @@ export default function Home() {
       <TeamAssigner />
     </main>
   )
-}
+}' > app/page.tsx
