@@ -1,4 +1,4 @@
-echo 'import TeamAssigner from "@/components/TeamAssigner"
+import TeamAssigner from "@/components/TeamAssigner"
 
 export default function Home() {
   return (
@@ -6,4 +6,4 @@ export default function Home() {
       <TeamAssigner />
     </main>
   )
-}' > app/page.tsx
+}
