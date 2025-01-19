@@ -64,24 +64,18 @@ const TeamAssigner = () => {
     const newTeams = Array.from({ length: numTeams }, (_, index) => ({
       name: generateTeamName(),
       members: [],
-      // Some teams get an extra player if players don't divide evenly
       targetSize: index < extraPlayers ? baseTeamSize + 1 : baseTeamSize
     }));
 
-    // Create groups starting with linked players
-    let groups = [...links];
-    
-    // Add remaining unlinked players as single-person groups
+    // Create groups starting with linked players and unlinked players
     const linkedPlayers = new Set(links.flat());
     const unlinkedPlayers = players.filter(player => !linkedPlayers.has(player));
     const unlinkedGroups = unlinkedPlayers.map(player => [player]);
-
-    // Shuffle both linked and unlinked groups
-    const shuffledGroups = [...groups, ...unlinkedGroups]
-      .sort(() => Math.random() - 0.5);
-
-    // Sort groups by size (largest first) to handle linked groups first
-    shuffledGroups.sort((a, b) => b.length - a.length);
+    
+    // Combine and shuffle all groups
+    const shuffledGroups = [...links, ...unlinkedGroups]
+      .sort(() => Math.random() - 0.5)
+      .sort((a, b) => b.length - a.length);
 
     // Assign groups to teams
     shuffledGroups.forEach(group => {
