@@ -75,9 +75,9 @@ const TeamAssigner = () => {
     const unlinkedPlayers = players.filter(player => !linkedPlayers.has(player));
     const unlinkedGroups = unlinkedPlayers.map(player => [player]);
     
+    // Remove the size-based sort and only do the random shuffle
     const shuffledGroups = [...links, ...unlinkedGroups]
-      .sort(() => Math.random() - 0.5)
-      .sort((a, b) => b.length - a.length);
+    .sort(() => Math.random() - 0.5);
 
     shuffledGroups.forEach(group => {
       const bestTeam = newTeams
