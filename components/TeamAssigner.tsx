@@ -9,13 +9,9 @@ interface Team {
   targetSize: number;
 }
 
-// This function helps us determine how well a combination of groups fits our target team size
-const evaluateCombination = (groups: string[][], targetSize: number): number => {
-  const totalPlayers = groups.reduce((sum, group) => sum + group.length, 0);
-  return Math.abs(targetSize - totalPlayers);
-};
-
-// This function generates all possible ways we could combine different groups together
+// This function finds all possible ways to combine groups
+// For example, if we have groups A, B, and C, it will return:
+// [], [A], [B], [C], [A,B], [A,C], [B,C], [A,B,C]
 const getCombinations = (groups: string[][]): string[][][] => {
   const result: string[][][] = [[]];
   
@@ -29,8 +25,33 @@ const getCombinations = (groups: string[][]): string[][][] => {
   return result;
 };
 
+// This function evaluates how good a particular team distribution would be
+// It considers both the team we're currently building and how that affects what's left
+const evaluateDistribution = (
+  combination: string[][],    // The groups we're considering for the current team
+  remainingGroups: string[][], // Groups that would be left over
+  targetSizes: number[]       // The ideal size for each team
+): number => {
+  // Calculate sizes for current and remaining teams
+  const currentTeamSize = combination.flat().length;
+  const remainingSize = remainingGroups.flat().length;
+  
+  // Calculate how far we are from our target sizes
+  const currentTeamDiff = Math.abs(currentTeamSize - targetSizes[0]);
+  const remainingDiff = Math.abs(remainingSize - targetSizes[1]);
+
+  // If this distribution would force an impossible situation for remaining teams,
+  // we heavily penalize it
+  if (remainingDiff > currentTeamDiff + 1) {
+    return Number.MAX_VALUE;
+  }
+
+  // Return a score based on how close we are to ideal sizes
+  // Lower scores are better
+  return currentTeamDiff + remainingDiff;
+};
+
 const TeamAssigner = () => {
-  // State management for players, teams, and UI interactions
   const [players, setPlayers] = useState<string[]>([]);
   const [newPlayer, setNewPlayer] = useState('');
   const [links, setLinks] = useState<string[][]>([]);
@@ -38,7 +59,6 @@ const TeamAssigner = () => {
   const [selectedPlayers, setSelectedPlayers] = useState<string[]>([]);
   const [numTeams, setNumTeams] = useState(2);
 
-  // Handles adding a new player to the game
   const addPlayer = (e: FormEvent) => {
     e.preventDefault();
     if (newPlayer.trim()) {
@@ -47,14 +67,12 @@ const TeamAssigner = () => {
     }
   };
 
-  // Handles removing a player from the game
   const removePlayer = (index: number) => {
     const newPlayers = players.filter((_, i) => i !== index);
     setPlayers(newPlayers);
     setLinks(links.filter(link => !link.includes(players[index])));
   };
 
-  // Handles selecting/deselecting players for linking
   const togglePlayerSelection = (player: string) => {
     if (selectedPlayers.includes(player)) {
       setSelectedPlayers(selectedPlayers.filter(p => p !== player));
@@ -63,7 +81,6 @@ const TeamAssigner = () => {
     }
   };
 
-  // Creates a link between selected players
   const createLink = () => {
     if (selectedPlayers.length >= 2) {
       setLinks([...links, selectedPlayers]);
@@ -71,12 +88,10 @@ const TeamAssigner = () => {
     }
   };
 
-  // Removes a previously created link
   const removeLink = (index: number) => {
     setLinks(links.filter((_, i) => i !== index));
   };
 
-  // Generates a random team name from predefined adjectives and nouns
   const generateTeamName = () => {
     const adjectives = ['Mighty', 'Clever', 'Witty', 'Blazing', 'Quantum', 'Epic', 'Cosmic'];
     const nouns = ['Minds', 'Wizards', 'Dragons', 'Legends', 'Phoenixes', 'Titans', 'Scholars'];
@@ -85,20 +100,24 @@ const TeamAssigner = () => {
     }`;
   };
 
-  // Our new team assignment logic that balances randomness with even team sizes
   const assignTeams = () => {
     if (players.length === 0) return;
 
-    // Calculate ideal team sizes
+    // First, calculate our target team sizes
     const totalPlayers = players.length;
     const baseTeamSize = Math.floor(totalPlayers / numTeams);
     const extraPlayers = totalPlayers % numTeams;
+
+    // Create target sizes for each team
+    // For example, with 11 players and 2 teams: [6, 5]
+    const targetSizes = Array(numTeams).fill(baseTeamSize)
+      .map((size, index) => index < extraPlayers ? size + 1 : size);
 
     // Initialize teams with names and empty member arrays
     const newTeams: Team[] = Array.from({ length: numTeams }, (_, index) => ({
       name: generateTeamName(),
       members: [] as string[],
-      targetSize: index < extraPlayers ? baseTeamSize + 1 : baseTeamSize
+      targetSize: targetSizes[index]
     }));
 
     // Separate linked groups from individual players
@@ -106,53 +125,50 @@ const TeamAssigner = () => {
     const unlinkedPlayers = players.filter(player => !linkedPlayers.has(player));
     const individualGroups = unlinkedPlayers.map(player => [player]);
     
-    // Sort linked groups by size for easier balancing
-    const sortedLinks = [...links].sort((a, b) => b.length - a.length);
-    
-    // Keep track of groups we haven't assigned yet
-    let remainingGroups = [...sortedLinks, ...individualGroups];
-    
-    // Assign groups to teams, trying to maintain balance
-    for (let i = 0; i < newTeams.length && remainingGroups.length > 0; i++) {
+    // Start with linked groups and individual players
+    let remainingGroups = [...links, ...individualGroups];
+
+    // For each team (except the last one)
+    for (let i = 0; i < newTeams.length - 1 && remainingGroups.length > 0; i++) {
       const team = newTeams[i];
-      const targetSize = team.targetSize;
       
-      // Find all possible ways to combine the remaining groups
+      // Find all possible combinations of remaining groups
       const possibleCombinations = getCombinations(remainingGroups);
       
-      // Evaluate how well each combination fits our target size
+      // Evaluate each combination based on how well it would work
       const evaluatedCombinations = possibleCombinations.map(combo => ({
         combination: combo,
-        difference: evaluateCombination(combo, targetSize)
+        score: evaluateDistribution(
+          combo,
+          remainingGroups.filter(g => !combo.includes(g)),
+          [targetSizes[i], targetSizes[i + 1]]
+        )
       }));
       
-      // Find all combinations that are equally good at maintaining balance
-      const minDifference = Math.min(...evaluatedCombinations.map(c => c.difference));
-      const bestCombinations = evaluatedCombinations.filter(c => c.difference === minDifference);
+      // Find the combinations that would work best
+      const bestScore = Math.min(...evaluatedCombinations.map(c => c.score));
+      const bestCombinations = evaluatedCombinations.filter(c => c.score === bestScore);
       
       // Randomly select one of the best combinations
-      const selectedCombination = bestCombinations[Math.floor(Math.random() * bestCombinations.length)].combination;
+      const selectedCombination = bestCombinations[
+        Math.floor(Math.random() * bestCombinations.length)
+      ].combination;
       
-      // Add the selected players to the team
-      const selectedPlayers = selectedCombination.flat();
-      team.members = selectedPlayers;
+      // Add these players to the team
+      team.members = selectedCombination.flat();
       
-      // Remove the groups we've used from our remaining groups
-      const usedGroups = new Set(selectedCombination.map(group => group.join(',')));
-      remainingGroups = remainingGroups.filter(group => !usedGroups.has(group.join(',')));
-    }
-    
-    // Handle any leftover players by adding them to teams with space
-    if (remainingGroups.length > 0) {
-      const remainingPlayers = remainingGroups.flat();
-      remainingPlayers.forEach(player => {
-        const teamWithSpace = newTeams
-          .sort((a, b) => (a.members.length - a.targetSize) - (b.members.length - b.targetSize))[0];
-        teamWithSpace.members.push(player);
-      });
+      // Remove the used groups from our remaining groups
+      const usedGroups = new Set(selectedCombination.map(g => g.join(',')));
+      remainingGroups = remainingGroups.filter(g => !usedGroups.has(g.join(',')));
     }
 
-    // Shuffle the order of players within each team for presentation
+    // The last team gets any remaining players
+    if (remainingGroups.length > 0) {
+      const lastTeam = newTeams[newTeams.length - 1];
+      lastTeam.members = remainingGroups.flat();
+    }
+
+    // Shuffle the player order within each team for presentation
     newTeams.forEach(team => {
       team.members.sort(() => Math.random() - 0.5);
     });
@@ -160,7 +176,7 @@ const TeamAssigner = () => {
     setTeams(newTeams);
   };
 
-  // The UI portion of our component
+  // UI render code remains the same as before...
   return (
     <div className="max-w-2xl mx-auto p-4 space-y-6">
       <div className="bg-white shadow-lg rounded-lg p-6 border border-gray-200">
