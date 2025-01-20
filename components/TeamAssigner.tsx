@@ -61,31 +61,25 @@ const TeamAssigner = () => {
   const assignTeams = () => {
     if (players.length === 0) return;
 
-    // Calculate ideal team sizes
     const totalPlayers = players.length;
     const baseTeamSize = Math.floor(totalPlayers / numTeams);
     const extraPlayers = totalPlayers % numTeams;
 
-    // Initialize teams with names and empty member arrays
     const newTeams: Team[] = Array.from({ length: numTeams }, (_, index) => ({
       name: generateTeamName(),
       members: [] as string[],
       targetSize: index < extraPlayers ? baseTeamSize + 1 : baseTeamSize
     }));
 
-    // Create groups starting with linked players and unlinked players
     const linkedPlayers = new Set(links.flat());
     const unlinkedPlayers = players.filter(player => !linkedPlayers.has(player));
     const unlinkedGroups = unlinkedPlayers.map(player => [player]);
     
-    // Combine and shuffle all groups
     const shuffledGroups = [...links, ...unlinkedGroups]
       .sort(() => Math.random() - 0.5)
       .sort((a, b) => b.length - a.length);
 
-    // Assign groups to teams
     shuffledGroups.forEach(group => {
-      // Find the team that's furthest from its target size and can accommodate this group
       const bestTeam = newTeams
         .filter(team => team.members.length + group.length <= team.targetSize)
         .sort((a, b) => {
@@ -108,37 +102,41 @@ const TeamAssigner = () => {
 
   return (
     <div className="max-w-2xl mx-auto p-4 space-y-6">
-      <div className="bg-white shadow rounded-lg p-6">
-        <h2 className="text-2xl font-bold mb-4">Trivia Team Assigner</h2>
+      <div className="bg-white shadow-lg rounded-lg p-6 border border-gray-200">
+        <h1 className="text-2xl font-bold mb-6 text-gray-900">Trivia Team Assigner</h1>
         
-        <form onSubmit={addPlayer} className="flex gap-2 mb-4">
+        <form onSubmit={addPlayer} className="flex gap-2 mb-6">
           <input
             type="text"
             value={newPlayer}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setNewPlayer(e.target.value)}
             placeholder="Enter player name"
-            className="flex-1 p-2 border rounded"
+            className="flex-1 p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 text-gray-900"
+            aria-label="Player name input"
           />
           <button 
             type="submit" 
-            className="p-2 bg-blue-500 text-white rounded hover:bg-blue-600 flex items-center"
+            className="p-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-300 flex items-center shadow-sm"
+            aria-label="Add player"
           >
-            <Plus className="w-5 h-5" />
+            <Plus className="w-6 h-6" />
           </button>
         </form>
 
-        <div className="mb-4">
-          <h3 className="font-semibold mb-2">Players ({players.length})</h3>
+        <div className="mb-6">
+          <h2 className="text-lg font-semibold mb-3 text-gray-900">Players ({players.length})</h2>
           <div className="flex flex-wrap gap-2">
             {players.map((player, index) => (
               <div
                 key={index}
-                className={`p-2 rounded flex items-center gap-2 cursor-pointer ${
+                className={`p-3 rounded-lg flex items-center gap-2 cursor-pointer border-2 shadow-sm ${
                   selectedPlayers.includes(player)
-                    ? 'bg-blue-100 border-blue-500'
-                    : 'bg-gray-100'
+                    ? 'bg-blue-100 border-blue-500 text-blue-900'
+                    : 'bg-gray-100 border-gray-300 text-gray-900 hover:border-gray-400'
                 }`}
                 onClick={() => togglePlayerSelection(player)}
+                role="button"
+                aria-pressed={selectedPlayers.includes(player)}
               >
                 {player}
                 <button
@@ -146,7 +144,8 @@ const TeamAssigner = () => {
                     e.stopPropagation();
                     removePlayer(index);
                   }}
-                  className="hover:text-red-500"
+                  className="hover:text-red-600 focus:text-red-600 p-1"
+                  aria-label={`Remove ${player}`}
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -155,21 +154,22 @@ const TeamAssigner = () => {
           </div>
         </div>
 
-        <div className="mb-4">
-          <div className="flex items-center gap-2 mb-2">
-            <h3 className="font-semibold">Links</h3>
+        <div className="mb-6">
+          <div className="flex items-center gap-3 mb-3">
+            <h2 className="text-lg font-semibold text-gray-900">Links</h2>
             <button
               onClick={createLink}
               disabled={selectedPlayers.length < 2}
-              className={`p-1 rounded ${
+              className={`p-2 rounded-lg focus:ring-2 ${
                 selectedPlayers.length >= 2
-                  ? 'bg-green-500 text-white hover:bg-green-600'
-                  : 'bg-gray-300'
+                  ? 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-300'
+                  : 'bg-gray-200 text-gray-500 cursor-not-allowed'
               }`}
+              aria-label="Create link between selected players"
             >
-              <LinkIcon className="w-4 h-4" />
+              <LinkIcon className="w-5 h-5" />
             </button>
-            <span className="text-sm text-gray-600">
+            <span className="text-sm text-gray-600" aria-live="polite">
               {selectedPlayers.length > 0 
                 ? `Selected: ${selectedPlayers.length} players`
                 : 'Select 2+ players to link'}
@@ -177,11 +177,12 @@ const TeamAssigner = () => {
           </div>
           <div className="flex flex-wrap gap-2">
             {links.map((link, index) => (
-              <div key={index} className="p-2 bg-blue-100 rounded flex items-center gap-2">
-                {link.join(' + ')}
+              <div key={index} className="p-3 bg-blue-100 border-2 border-blue-300 rounded-lg flex items-center gap-2 shadow-sm">
+                <span className="text-blue-900">{link.join(' + ')}</span>
                 <button
                   onClick={() => removeLink(index)}
-                  className="hover:text-red-500"
+                  className="hover:text-red-600 focus:text-red-600 p-1"
+                  aria-label="Remove link"
                 >
                   <X className="w-4 h-4" />
                 </button>
@@ -190,9 +191,9 @@ const TeamAssigner = () => {
           </div>
         </div>
 
-        <div className="mb-4">
-          <div className="flex items-center gap-4 mb-2">
-            <label className="font-semibold">
+        <div className="mb-6">
+          <div className="flex flex-wrap items-center gap-4 mb-3">
+            <label className="font-semibold text-gray-900">
               Number of Teams:
               <input
                 type="number"
@@ -201,15 +202,17 @@ const TeamAssigner = () => {
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => 
                   setNumTeams(Math.max(2, parseInt(e.target.value) || 2))
                 }
-                className="ml-2 p-1 w-16 border rounded"
+                className="ml-2 p-2 w-20 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                aria-label="Number of teams"
               />
             </label>
             <button
               onClick={assignTeams}
-              className="p-2 bg-purple-500 text-white rounded hover:bg-purple-600 flex items-center gap-2"
+              className="p-3 bg-purple-600 text-white rounded-lg hover:bg-purple-700 focus:ring-2 focus:ring-purple-300 flex items-center gap-2 shadow-sm"
+              aria-label="Assign teams"
             >
               <Shuffle className="w-5 h-5" />
-              Assign Teams
+              <span>Assign Teams</span>
             </button>
           </div>
         </div>
@@ -217,14 +220,19 @@ const TeamAssigner = () => {
         {teams.length > 0 && (
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {teams.map((team, index) => (
-              <div key={index} className="p-4 bg-gray-100 rounded">
-                <h3 className="font-bold mb-2">{team.name}</h3>
-                <ul className="list-disc list-inside">
+              <div 
+                key={index} 
+                className="p-4 bg-gray-50 border-2 border-gray-300 rounded-lg shadow-sm"
+                role="region"
+                aria-label={`Team ${index + 1}`}
+              >
+                <h3 className="font-bold mb-3 text-lg text-gray-900">{team.name}</h3>
+                <ul className="list-disc list-inside space-y-1">
                   {team.members.map((member, mIndex) => (
-                    <li key={mIndex}>{member}</li>
+                    <li key={mIndex} className="text-gray-800">{member}</li>
                   ))}
                 </ul>
-                <div className="mt-2 text-sm text-gray-600">
+                <div className="mt-3 text-sm font-medium text-gray-600">
                   Team Size: {team.members.length}
                 </div>
               </div>
