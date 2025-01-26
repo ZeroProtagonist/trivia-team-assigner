@@ -176,7 +176,7 @@ const TeamAssigner = () => {
     setTeams(newTeams);
   };
 
-  // UI render code remains the same as before...
+
   return (
     <div className="max-w-2xl mx-auto p-4 space-y-6">
       <div className="bg-white shadow-lg rounded-lg p-6 border border-gray-200">
@@ -184,7 +184,7 @@ const TeamAssigner = () => {
   <h1 className="text-2xl font-bold text-gray-900">Trivia Team Assigner</h1>
   <a 
     href="/how-to"
-    className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:ring-2 focus:ring-gray-300"
+    className="px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-300"
   >
     How to Use
   </a>
