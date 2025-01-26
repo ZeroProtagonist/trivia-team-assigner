@@ -180,7 +180,15 @@ const TeamAssigner = () => {
   return (
     <div className="max-w-2xl mx-auto p-4 space-y-6">
       <div className="bg-white shadow-lg rounded-lg p-6 border border-gray-200">
-        <h1 className="text-2xl font-bold mb-6 text-gray-900">Trivia Team Assigner</h1>
+      <div className="flex justify-between items-center mb-6">
+  <h1 className="text-2xl font-bold text-gray-900">Trivia Team Assigner</h1>
+  <a 
+    href="/how-to"
+    className="px-3 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 focus:ring-2 focus:ring-gray-300"
+  >
+    How to Use
+  </a>
+</div>
         
         <form onSubmit={addPlayer} className="flex gap-2 mb-6">
           <input
