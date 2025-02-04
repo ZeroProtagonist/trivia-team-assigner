@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default function HowTo(): JSX.Element {
   return (
     <main className="min-h-screen bg-white p-4">
@@ -12,7 +14,7 @@ export default function HowTo(): JSX.Element {
               Adding Players
             </h2>
             <p className="text-gray-800 mb-2">
-              1. Enter each player's name in the input field
+              1. Enter each player&apos;s name in the input field
             </p>
             <p className="text-gray-800">
               2. Click the plus button or press Enter to add them to the list
@@ -50,7 +52,7 @@ export default function HowTo(): JSX.Element {
               Generating Teams
             </h2>
             <p className="text-gray-800 mb-2">
-              1. Click "Assign Teams" to create random balanced teams
+              1. Click &quot;Assign Teams&quot; to create random balanced teams
             </p>
             <p className="text-gray-800 mb-2">
               2. Teams will be as evenly sized as possible
@@ -71,15 +73,16 @@ export default function HowTo(): JSX.Element {
           </section>
 
           <div className="pt-4">
-            <a
+            <Link
               href="/"
               className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-300"
             >
               Back to Team Assigner
-            </a>
+            </Link>
           </div>
         </div>
       </div>
     </main>
   );
 }
+
