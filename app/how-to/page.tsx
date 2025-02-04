@@ -73,11 +73,10 @@ export default function HowTo(): JSX.Element {
           </section>
 
           <div className="pt-4">
-            <Link
-              href="/"
-              className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-300"
-            >
-              Back to Team Assigner
+            <Link href="/" passHref legacyBehavior>
+              <a className="inline-block px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 focus:ring-2 focus:ring-blue-300">
+                Back to Team Assigner
+              </a>
             </Link>
           </div>
         </div>
@@ -85,4 +84,5 @@ export default function HowTo(): JSX.Element {
     </main>
   );
 }
+
 
