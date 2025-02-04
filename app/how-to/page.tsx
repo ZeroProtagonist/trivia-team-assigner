@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-export default function HowTo(): JSX.Element {
+export default function HowTo() {
   // Using template literals for text content helps React handle special characters
   // more consistently than HTML entities
   return (
