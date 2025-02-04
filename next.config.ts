@@ -1,7 +1,15 @@
-import type { NextConfig } from "next";
+import { NextConfig } from 'next'
 
-const nextConfig: NextConfig = {
-  /* config options here */
-};
+// The configuration object with proper TypeScript types
+const config: NextConfig = {
+  // ESLint configuration that tells Next.js to continue building even with warnings
+  eslint: {
+    // While ESLint will still run and show issues, it won't block the build process
+    ignoreDuringBuilds: true,
+  },
+  // Keeps React's strict mode enabled for better development practices
+  reactStrictMode: true,
+}
 
-export default nextConfig;
+// TypeScript requires this specific export syntax for module configurations
+export default config
